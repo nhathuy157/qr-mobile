@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import banksData from './banksData'; // Tệp chứa dữ liệu ngân hàng
 import './App.css';
 
@@ -25,7 +25,7 @@ function QRCodeForm() {
     }
   };
 
-  // Khi tạo QR code
+  //Khi tạo QR code
   const handleCreateQr = async () => {
     if (!bankDetails.STK || !amount) {
       setStatusMessage("Vui lòng nhập đủ thông tin!");
@@ -35,7 +35,7 @@ function QRCodeForm() {
 
     const bankId = bankDetails.BANK.split(' - ')[2];
     const srcTemplate = `https://img.vietqr.io/image/${bankId}-${bankDetails.STK}-print.png?amount=${amount}&addInfo=${descriptionPrefix} ${descriptionSuffix}&accountName=${bankDetails.CTK}`;
-    
+
     setQrSrc(srcTemplate);
     setShowImage(true);
 
@@ -44,83 +44,119 @@ function QRCodeForm() {
     imageQR.src = srcTemplate;
 
     imageQR.onload = async function () {
-      const canvas = document.createElement("canvas");
-      canvas.width = imageQR.width;
-      canvas.height = imageQR.height;
-      const ctx = canvas.getContext("2d");
+      try {
+        // Lưu kích thước ban đầu
+        imageQR.style.display = "block";
 
-      // Vẽ mã QR trước
-      ctx.drawImage(imageQR, 0, 0, imageQR.width, imageQR.height);
+        const canvas = document.createElement("canvas");
 
-      // Tìm logo và khung của ngân hàng trong dữ liệu
-      const foundBank = banksData.find(b => b.STK === bankDetails.STK);
-      if (foundBank) {
-        const logoImg = new Image();
-        const logoText = new Image();
-        const logoFrame = new Image();
-        
-        [logoImg, logoText, logoFrame].forEach(img => { img.crossOrigin = "anonymous"; });
+        const ratioZoom = 1000 / imageQR.width;
+        canvas.width = 1000; // độ rộng canvas cố định 1k
+        canvas.height = Math.round(imageQR.height * ratioZoom); // độ chiều cao canvas = hình imageQR.height * ratioZoom;
 
-        // Kiểm tra và tải hình ảnh logo, text, frame
-        if (foundBank.LOGO_IMG) logoImg.src = foundBank.LOGO_IMG;
-        if (foundBank.LOGO_TEXT) logoText.src = foundBank.LOGO_TEXT;
-        if (foundBank.FRAME) logoFrame.src = foundBank.FRAME;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(imageQR, 0, 0, canvas.width, canvas.height);
 
-        const imagesToLoad = [logoImg, logoText, logoFrame].filter(img => img.src);
-        let countLoad = 0;
+        // Tìm logo và khung của ngân hàng trong dữ liệu
+        const foundBank = banksData.find(b => b.STK === bankDetails.STK);
+        if (foundBank) {
+          const logoImg = new Image();
+          const logoText = new Image();
+          const logoFrame = new Image();
 
-        // Đợi cho đến khi tất cả các hình ảnh được tải
-        imagesToLoad.forEach(img => {
-          img.onload = () => { countLoad++; };
-        });
+          [logoImg, logoText, logoFrame].forEach(img => { img.crossOrigin = "anonymous"; });
 
-        while (countLoad < imagesToLoad.length) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
+          // Kiểm tra và tải hình ảnh logo, text, frame
+          if (foundBank.LOGO_IMG) logoImg.src = foundBank.LOGO_IMG;
+          if (foundBank.LOGO_TEXT) logoText.src = foundBank.LOGO_TEXT;
+          if (foundBank.FRAME) logoFrame.src = foundBank.FRAME;
 
-        // Vẽ logo text
-        if (logoText.src) {
+          const imagesToLoad = [logoImg, logoText, logoFrame].filter(img => img.src);
+          let countLoad = 0;
+
+          // Đợi cho đến khi tất cả các hình ảnh được tải
+          imagesToLoad.forEach(img => {
+            img.onload = () => { countLoad++; };
+          });
+
+          while (countLoad < imagesToLoad.length) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+
+          // Vẽ logo text
+          if (logoText.src) {
             let height = 190;
             let width = Math.round(logoText.width * height / logoText.height);
             if (width > 620) {
-                width = 620; height = Math.round(logoText.height * width / logoText.width);
+              width = 620; height = Math.round(logoText.height * width / logoText.width);
             }
             const x = Math.round((canvas.width - width) / 2);
             const y = Math.round((190 - height) / 2);
-            ctx.fillStyle = "white"; ctx.fillRect(0, 0, 1000, 190); 
+            ctx.fillStyle = "white"; ctx.fillRect(0, 0, 1000, 190);
             ctx.drawImage(logoText, x, y, width, height);   // Vẽ text vào canvas
-        }
-
-        // Vẽ logo ảnh
-        if (logoImg.src && logoImg.width === logoImg.height && logoImg.width > 0) {
-            ctx.fillStyle = "white"; ctx.fillRect(460, 460, 85, 85); 
-            ctx.drawImage(logoImg, 455, 455, 95, 95); 
-        }
-
-        if (logoFrame.src) {
-            ctx.drawImage(logoFrame, 0, 0, canvas.width, canvas.height);
-        }
-
-        // Chuyển canvas thành ảnh
-        canvas.toBlob(async (blob) => {
-          const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-          // Nếu là máy tính, copy vào clipboard
-          if (!isMobile && navigator.clipboard && window.ClipboardItem) {
-            await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-            setStatusMessage("QR đã được copy!");
-          } else {
-            // Nếu là mobile, tải về
-            const downloadLink = document.createElement('a');
-            downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = 'qr_code.png'; // Tên file khi tải về
-            downloadLink.click();  // Kích hoạt tải về
-            setStatusMessage("Ảnh đã được tải về.");
           }
-        }, "image/png");
+
+          // Vẽ logo ảnh
+          if (logoImg.src && logoImg.width === logoImg.height && logoImg.width > 0) {
+            ctx.fillStyle = "white"; ctx.fillRect(460, 460, 85, 85);
+            ctx.drawImage(logoImg, 455, 455, 95, 95);
+          }
+
+          if (logoFrame.src) {
+            ctx.drawImage(logoFrame, 0, 0, canvas.width, canvas.height);
+          }
+
+          // Chuyển canvas thành ảnh
+          canvas.toBlob(async (blob) => {
+            // Kiểm tra nếu đang sử dụng PC/laptop hay mobile (gồm cả iPhone/iPad)
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+            // Nếu là PC/laptop -> chỉ copy
+            if (!isMobile) {
+              try {
+                if (navigator.clipboard && window.ClipboardItem) {
+                  await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+                  // document.getElementById('status').innerText = "QR đã được copy!";
+                  // document.getElementById('status').style.color = "#28a745";
+                  setStatusMessage("QR đã được copy !");
+                } else {
+                  throw new Error("Clipboard API không được hỗ trợ.");
+                }
+              } catch (copyError) {
+                // document.getElementById('status').innerText = "Lỗi copy QR: " + copyError.message;
+                // document.getElementById('status').style.color = "#ff0000";
+                setStatusMessage("Lỗi copy QR: " + copyError.message);
+              }
+            }
+
+            // Nếu là mobile (bao gồm iPhone/iPad) -> vừa copy vừa tải về
+            if (isMobile || !navigator.clipboard) {
+              const downloadLink = document.createElement('a');
+              downloadLink.href = URL.createObjectURL(blob);
+              downloadLink.download = 'qr_code.png'; // Tên file khi tải về
+              downloadLink.click(); // Kích hoạt tải về máy
+
+              document.getElementById('status').innerText += " Ảnh đã được tải về.";
+            }
+          }, "image/png");
+        }
       }
+      catch (error) {
+        setStatusMessage("Lỗi copy QR: ");
+      }
+      finally {
+        imageQR.style.display = "none";
+      }
+
+
+
+
+
+
+
     };
   };
+ 
 
   return (
     <div className="container">
