@@ -44,6 +44,15 @@ const banksData = [
     LOGO_IMG: "https://raw.githubusercontent.com/nhathuy157/Img-Extension/main/LOGODPBTP-02.png",
     LOGO_TEXT: "https://raw.githubusercontent.com/nhathuy157/Img-Extension/main/LOGODPBTP1-02.png",
     FRAME: ""
+},
+{
+    LABEL: "Hạnh - New",
+    STK: "70178888",
+    CTK: "PHAN THI HANH",
+    BANK: "ACB - Ngân hàng TMCP Á Châu - 970416",
+    LOGO_IMG: "https://raw.githubusercontent.com/nhathuy157/Img-Extension/main/LOGODPBTP-02.png",
+    LOGO_TEXT: "https://raw.githubusercontent.com/nhathuy157/Img-Extension/main/LOGODPBTP1-02.png",
+    FRAME: ""
 }
   ];
 
