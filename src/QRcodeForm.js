@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import banksData from './banksData'; // Tệp chứa dữ liệu ngân hàng
-import { VietQR } from 'vietqr';
 import './App.css';
 
 function QRCodeForm() {
@@ -17,12 +16,30 @@ function QRCodeForm() {
 
   // Khởi tạo VietQR và lấy danh sách ngân hàng
   useEffect(() => {
-    // Sử dụng danh sách ngân hàng cố định (ACB, VCB, VPBank)
-    setVietQRBanks([
-      { bin: '970436', shortName: 'VCB', name: 'Ngân hàng TMCP Ngoại Thương Việt Nam' },
-      { bin: '970416', shortName: 'ACB', name: 'Ngân hàng TMCP Á Châu' },
-      { bin: '970432', shortName: 'VPBank', name: 'Ngân hàng TMCP Việt Nam Thịnh Vượng' }
-    ]);
+    const fetchBanks = async () => {
+      try {
+        // Sử dụng API public để lấy danh sách ngân hàng
+        const response = await fetch('https://api.vietqr.io/v2/banks');
+        const result = await response.json();
+        
+        if (result.code === '00' && result.data) {
+          // Lấy tất cả ngân hàng từ API
+          setVietQRBanks(result.data);
+        } else {
+          throw new Error('Không thể lấy danh sách ngân hàng');
+        }
+      } catch (error) {
+        console.error('Lỗi khi lấy danh sách ngân hàng:', error);
+        // Fallback với 3 ngân hàng cơ bản nếu không lấy được từ API
+        setVietQRBanks([
+          { bin: '970436', shortName: 'VCB', name: 'Ngân hàng TMCP Ngoại Thương Việt Nam' },
+          { bin: '970416', shortName: 'ACB', name: 'Ngân hàng TMCP Á Châu' },
+          { bin: '970432', shortName: 'VPBank', name: 'Ngân hàng TMCP Việt Nam Thịnh Vượng' }
+        ]);
+      }
+    };
+
+    fetchBanks();
   }, []);
 
   // Khi chọn thương hiệu
@@ -173,7 +190,7 @@ function QRCodeForm() {
             if (isMobile || !navigator.clipboard) {
               const downloadLink = document.createElement('a');
               downloadLink.href = URL.createObjectURL(blob);
-              downloadLink.download = 'qr_code.png'; // Tên file khi tải về
+              downloadLink.download = 'qr_code.png'; // Tên file khi tải vềdd
               downloadLink.click(); // Kích hoạt tải về máy
 
               setStatusMessage("QR đã được copy ! Ảnh đã được tải về.");
@@ -214,13 +231,6 @@ function QRCodeForm() {
       finally {
         imageQR.style.display = "none";
       }
-
-
-
-
-
-
-
     };
   };
  
@@ -294,7 +304,6 @@ function QRCodeForm() {
           <label htmlFor="AMOUNT">Số tiền</label>
           <input type="text" id="AMOUNT" placeholder="Nhập số tiền..." value={amount} onChange={e => setAmount(e.target.value)} />
         </div>
-
         <div className="form-group">
           <label htmlFor="DESCRIPTION">Nội dung</label>
           <div className="input-container">
@@ -302,16 +311,14 @@ function QRCodeForm() {
             <input type="text" id="DESCRIPTION_SUFFIX" value={descriptionSuffix} disabled />
           </div>
         </div>
-
         <button type="button" className="btn btn-success" onClick={handleCreateQr}>Tạo mã QR</button>
-
         {statusMessage && <p id="status">{statusMessage}</p>}
       </form>
 
       {showImage && (
         <div>
           <img id="imageQR" src={qrSrc} alt="QR Code" width="1000px" style={{ display: 'block' }} />
-        </div>
+        </div> 
       )}
     </div>
   );
