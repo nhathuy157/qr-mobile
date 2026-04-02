@@ -1,15 +1,16 @@
 {
   "files": {
-    "main.css": "/qr-mobile/static/css/main.90a0bff8.css",
-    "main.js": "/qr-mobile/static/js/main.12f6807b.js",
+    "main.css": "/qr-mobile/static/css/main.9179b3c7.css",
+    "main.js": "/qr-mobile/static/js/main.c688e9c9.js",
     "static/js/453.5902df59.chunk.js": "/qr-mobile/static/js/453.5902df59.chunk.js",
+    "static/media/z7684349050054_jpg": "/qr-mobile/static/media/z7684349050054_1feaf85d3db8ac90a041e308a4d60d62.717d1f9479a6f8a67dc5.jpg",
     "index.html": "/qr-mobile/index.html",
-    "main.90a0bff8.css.map": "/qr-mobile/static/css/main.90a0bff8.css.map",
-    "main.12f6807b.js.map": "/qr-mobile/static/js/main.12f6807b.js.map",
+    "main.9179b3c7.css.map": "/qr-mobile/static/css/main.9179b3c7.css.map",
+    "main.c688e9c9.js.map": "/qr-mobile/static/js/main.c688e9c9.js.map",
     "453.5902df59.chunk.js.map": "/qr-mobile/static/js/453.5902df59.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.90a0bff8.css",
-    "static/js/main.12f6807b.js"
+    "static/css/main.9179b3c7.css",
+    "static/js/main.c688e9c9.js"
   ]
 }
